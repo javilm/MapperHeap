@@ -215,65 +215,62 @@ live in normal RAM, never in the heap they point into.
 ```
 ; File: example.as
 
-		.z80
-		include	dos2func.inc	; MSX-DOS function numbers
-		include	alloc.inc	; the heap routines
-		include	farptr.inc	; far-pointer macros + NULLOFF
+        .z80
+        include dos2func.inc  ; MSX-DOS function numbers
+        include alloc.inc     ; the heap routines
+        include farptr.inc    ; far-pointer macros + NULLOFF
 
-		external dos2check	; from dos2chec.as
+        external dos2check    ; from dos2chec.as
 
-BDOS		equ	00005h		; dos2func.inc gives the function
-					; numbers, not this entry address
+BDOS    equ     00005h        ; dos2func.inc gives the function
+                              ; numbers, not this entry address
 
-system		macro	func		; the usual shorthand for a BDOS call
-		ld	c,func
-		call	BDOS
-		endm
+system  macro   func          ; the usual shorthand for a BDOS call
+        ld      c,func
+        call    BDOS
+        endm
 
-		cseg
+        cseg
 
-start:		call	dos2check	; MSX-DOS2?
-		jp	c,nodos2	; CY = no, this is MSX-DOS1
+start:  call    dos2check   ; MSX-DOS2?
+        jp      c,nodos2    ; CY = no, this is MSX-DOS1
 
-		call	heapinit	; bring up the mapper heap
-		jp	c,nomapper	; CY = no mapper support
+        call    heapinit    ; bring up the mapper heap
+        jp      c,nomapper  ; CY = no mapper support
 
-		ld	bc,1000		; want a 1000-byte block
-		ld	hl,myptr	; where the far pointer will be written
-		call	halloc
-		jp	c,outofmem	; CY = no memory left
+        fpalloc myptr,1000  ; want a 1000-byte block in myptr
+        jp      c,outofmem  ; CY = no memory left
 
-		derefp	myptr		; make the block addressable:
-		ld	(hl),42		;   HL = live address in page 2
+        derefp  myptr       ; make the block addressable:
+        ld      (hl),42     ;   HL = live address in page 2
 
-		call	p2restore	; hand page 2 back to DOS...
-		ld	de,message
-		system	_STROUT		; ...before ANY BDOS call
+        call    p2restore   ; hand page 2 back to DOS...
+        ld      de,message
+        system  _STROUT     ; ...before ANY BDOS call
 
-		ld	hl,myptr	; done with the block
-		call	hfree
+        fpfree  myptr       ; done with the block
 
-		call	p2restore	; and before returning to DOS
-		system	_TERM0
+        call    p2restore   ; and before returning to DOS
+        system	_TERM0
 
-nodos2:		ld	de,msg_dos1
-		jr	abort
-nomapper:	ld	de,msg_nomap
-		jr	abort
-outofmem:	ld	de,msg_oom
-abort:		push	de		; p2restore modifies DE, so the message
-		call	p2restore	;   address has to be saved across it
-		pop	de
-		system	_STROUT
-		system	_TERM0
+nodos2: ld      de,msg_dos1
+        jr      abort
+nomapper: ld    de,msg_nomap
+        jr      abort
+outofmem: ld    de,msg_oom
+abort:  push    de          ; p2restore modifies DE, so the message
+        call    p2restore   ;   address has to be saved across it
+        pop     de
+        system  _STROUT
+        system  _TERM0
 
-		dseg
+        dseg
 
-message:	defb	"Block allocated and written.",13,10,"$"
-msg_dos1:	defb	"This program needs MSX-DOS2.",13,10,"$"
-msg_nomap:	defb	"No memory mapper found.",13,10,"$"
-msg_oom:	defb	"Out of mapper memory.",13,10,"$"
-myptr:		defs	4		; one far pointer
+message:   defb  "Block allocated and written.",13,10,"$"
+msg_dos1:  defb  "This program needs MSX-DOS2.",13,10,"$"
+msg_nomap: defb  "No memory mapper found.",13,10,"$"
+msg_oom:   defb  "Out of mapper memory.",13,10,"$"
+myptr:     defs  4  ; one far pointer
 ```
 
 Build it with:
