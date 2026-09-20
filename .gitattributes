@@ -1,2 +1,5 @@
 tests/** linguist-detectable=false
+*.as linguist-language=Assembly
+*.inc linguist-language=Assembly
+
 
