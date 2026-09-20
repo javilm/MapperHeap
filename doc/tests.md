@@ -121,7 +121,7 @@ Two details of how the line is produced matter:
 The log is captured by redirecting the program's output to a file under
 MSX-DOS2.
 
-Open the file [heaptst2.html](heaptst2.html) in your web browser for a visualization
+Open the file [../tests/heaptst2.html](heaptst2.html) in your web browser for a visualization
 of the test program log. You'll be able to see 8 MBs worth of blocks being allocated in phase A, then some
 of these blocks being freed (phase B), and 8 MBs worth of small blocks being allocated in the freed gaps.
 
