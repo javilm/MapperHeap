@@ -1,6 +1,6 @@
 ; alloc.as - Heap allocator over MSX-DOS2 memory-mapper RAM.
 ;
-; MapperHeap v1.0.0
+; MapperHeap v1.0.1
 ;
 ; General-purpose alloc/free (first-fit, coalescing) backed by 16KB mapper
 ; segments from ANY mapper in the system, addressed through 4-byte far
@@ -209,6 +209,10 @@ allocseg:	call	p2restore	; ALL_SEG is a DOS service: sane
 ;			+2..3 offset (0..03FFFh)
 ; Output:	HL = 08000h + offset (mapped and ready)
 ; Modifies:	AF, DE, HL
+;
+;       NOT BC: the full-remap path calls ENASLT, which the BIOS
+;       documents as destroying every register. deref saves BC
+;       so that a caller may hold a counter there across a call.
 
 ; For documentation on how to call ENASLT from MSX-DOS(2), refer to:
 ; MSX-Datapack Volume 1, chapter 3: MSX-DOS (p.397-399)
@@ -216,7 +220,8 @@ allocseg:	call	p2restore	; ALL_SEG is a DOS service: sane
 ; For documentation of the meaning of port 0FEh, refer to:
 ; MSX-Datapack Volume 1, chapter 1: Hardware (p.6-8)
 
-deref:		; Copy and unpack the far pointer
+deref:	push	bc
+		; Copy and unpack the far pointer
 		ld	a,(hl)		; +0 slot
 		ld	(fp_slot),a
 		inc	hl
@@ -270,6 +275,7 @@ deref.addr:	; Address computation
 		ld	hl,(fp_off)
 		ld	de,08000h
 		add	hl,de
+		pop	bc
 		ret
 
 ; p2restore - hand page 2 back to MSX-DOS: restore the slot/segment DOS had

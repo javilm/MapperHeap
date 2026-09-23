@@ -1,6 +1,6 @@
 # MapperHeap — a memory-mapper heap for MSX-DOS2
 
-Version 1.0.0
+Version 1.0.1
 
 MapperHeap gives an MSX-DOS2 program a general-purpose heap (allocate a
 block, use it, give it back) with the blocks living in **memory-mapper RAM**
